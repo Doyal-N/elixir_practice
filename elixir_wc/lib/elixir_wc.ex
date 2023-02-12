@@ -1,8 +1,11 @@
 defmodule ElixirWc do
+  import File, only: [stream!: 1]
+
   @spec lines_count(binary()) :: non_neg_integer()
   def lines_count(path) do
     stream!(path)
     |> Flow.from_enumerable()
+    |> Flow.map(&String.trim/1)
     |> Flow.filter(fn line -> line != "\n" end)
     |> Flow.partition()
     |> Enum.count()
@@ -27,15 +30,19 @@ defmodule ElixirWc do
   end
 
   defp word_count(str) do
-    String.split(str)
+    str
+    |> String.split()
     |> Enum.count()
   end
 
   defp char_count(str) do
-    String.trim(str)
+    str
+    |> String.trim()
     |> String.graphemes()
     |> Enum.reduce(0, &unless(&1 == " ", do: &2 + 1, else: &2))
   end
-
-  defp stream!(path), do: File.stream!(path)
 end
+
+  # Улучшить:
+  #  считать строки, слова и символы в одном проходе;
+  #  аккуратнее с пробелами.
